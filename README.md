@@ -48,6 +48,11 @@ An intelligent academic paper discovery and extraction platform that uses Google
 
 ## Usage
 
+### Online (Deployed Version)
+Visit the live application: **https://pdf-research-scraper.onrender.com/**
+
+### Local Setup
+
 1. Start the application:
    ```bash
    python app.py
