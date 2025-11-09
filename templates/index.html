@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Research Scraper</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #0d1117;
+            --border-color: #30363d;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-tertiary: #6e7681;
+            --accent-color: #238636;
+            --accent-hover: #2ea043;
+            --link-color: #58a6ff;
+            --terminal-bg: #0d1117;
+            --terminal-text: #3fb950;
+            --error-color: #f85149;
+            --warning-color: #f0883e;
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f6f8fa;
+            --bg-tertiary: #ffffff;
+            --border-color: #d0d7de;
+            --text-primary: #1f2328;
+            --text-secondary: #656d76;
+            --text-tertiary: #848d97;
+            --accent-color: #1f883d;
+            --accent-hover: #1a7f37;
+            --link-color: #0969da;
+            --terminal-bg: #f6f8fa;
+            --terminal-text: #1a7f37;
+            --error-color: #d1242f;
+            --warning-color: #bf8700;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 48px;
+            position: relative;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--link-color);
+        }
+
+        .theme-icon {
+            font-size: 1.1rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            font-weight: 400;
+            margin-bottom: 8px;
+        }
+
+        .developer {
+            color: var(--text-tertiary);
+            font-size: 0.9rem;
+            margin-top: 12px;
+            font-weight: 500;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 24px;
+            transition: background 0.3s ease, border 0.3s ease;
+        }
+
+        form {
+            display: grid;
+            gap: 24px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        input, select {
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-weight: 400;
+        }
+
+        input::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--link-color);
+            background: var(--bg-tertiary);
+        }
+
+        input:hover, select:hover {
+            border-color: var(--text-secondary);
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            padding: 12px;
+            border-radius: 6px;
+            transition: background 0.2s ease;
+        }
+
+        .radio-option:hover {
+            background: var(--bg-secondary);
+        }
+
+        .radio-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            margin: 0;
+            accent-color: var(--link-color);
+        }
+
+        .radio-option label {
+            cursor: pointer;
+            margin: 0;
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        .btn-primary {
+            background: var(--accent-color);
+            color: #ffffff;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 8px;
+            transition: background 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-primary:active {
+            background: var(--accent-color);
+            transform: scale(0.98);
+        }
+
+        .btn-primary:disabled {
+            background: var(--border-color);
+            color: var(--text-tertiary);
+            cursor: not-allowed;
+        }
+
+        .status {
+            margin-top: 24px;
+            padding: 24px;
+            border-radius: 12px;
+            display: none;
+            transition: all 0.3s ease;
+        }
+
+        .status.running {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            display: block;
+        }
+
+        .status.completed {
+            background: var(--bg-secondary);
+            border: 1px solid var(--accent-color);
+            display: block;
+        }
+
+        .status.error {
+            background: var(--bg-secondary);
+            border: 1px solid var(--error-color);
+            display: block;
+        }
+
+        .status h3 {
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .status.running .status-indicator {
+            background: var(--warning-color);
+            animation: pulse-indicator 2s ease-in-out infinite;
+        }
+
+        .status.completed .status-indicator {
+            background: var(--accent-color);
+        }
+
+        .status.error .status-indicator {
+            background: var(--error-color);
+        }
+
+        @keyframes pulse-indicator {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--border-color);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 16px 0;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--accent-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .terminal {
+            background: var(--terminal-bg);
+            color: var(--terminal-text);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 6px;
+            max-height: 450px;
+            overflow-y: auto;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .terminal::before {
+            content: 'Terminal Output';
+            display: block;
+            color: var(--text-secondary);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .terminal::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .terminal::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+        }
+
+        .terminal::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        .terminal::-webkit-scrollbar-thumb:hover {
+            background: var(--text-tertiary);
+        }
+
+        .btn-download {
+            background: var(--accent-color);
+            color: #ffffff;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-top: 16px;
+            transition: background 0.2s ease;
+            display: none;
+        }
+
+        .btn-download:hover {
+            background: var(--accent-hover);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 48px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-tertiary);
+            font-size: 0.9rem;
+        }
+
+        .footer a {
+            color: var(--link-color);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 24px 16px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .card {
+                padding: 24px;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .theme-toggle {
+                position: static;
+                margin: 0 auto 20px;
+                width: fit-content;
+            }
+
+            .header {
+                margin-bottom: 24px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 20px 12px;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .subtitle {
+                font-size: 0.95rem;
+            }
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 0.6s linear infinite;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+                <span class="theme-icon">🌙</span>
+                <span class="theme-text">Dark Mode</span>
+            </button>
+            <h1>PDF Research Scraper</h1>
+            <p class="subtitle">Academic paper discovery and extraction platform</p>
+            <p class="developer">Developed by Akshay Gurav</p>
+        </div>
+        
+        <div class="card">
+            <form id="scraper-form">
+                <div class="form-group">
+                    <label for="keywords">Enter your research topic or concept in detail</label>
+                    <input type="text" id="keywords" name="keywords" required placeholder="e.g., Explain the impact of artificial intelligence on healthcare diagnostics and treatment personalization">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required placeholder="your.email@example.com">
+                </div>
+                
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="max">Max PDFs</label>
+                        <input type="number" id="max" name="max" value="20" min="1" max="100">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="pause">Request Delay (seconds)</label>
+                        <input type="number" id="pause" name="pause" value="2.0" step="0.1" min="0.1">
+                    </div>
+                </div>
+                
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="start_date">Start Date</label>
+                        <input type="date" id="start_date" name="start_date" value="2024-01-01">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="end_date">End Date</label>
+                        <input type="date" id="end_date" name="end_date" value="2025-12-31">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Publisher Filter</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="specific_publishers" name="publisher_filter" value="specific" checked>
+                            <label for="specific_publishers">Focus on Premium Publishers (Springer, IEEE, Scopus, Elsevier)</label>
+                        </div>
+                        
+                        <div class="radio-option">
+                            <input type="radio" id="all_publishers" name="publisher_filter" value="all">
+                            <label for="all_publishers">Include All Publishers</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" id="submit-btn" class="btn-primary">Start Scraping</button>
+            </form>
+        </div>
+        
+        <div id="status" class="status">
+            <h3>
+                <span class="status-indicator"></span>
+                <span id="status-text">Running...</span>
+            </h3>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="progress-bar"></div>
+            </div>
+            <div id="log" class="terminal"></div>
+            <button id="download-btn" class="btn-download">Download Results</button>
+        </div>
+
+        <div class="footer">
+            <p>© 2025 PDF Research Scraper • Developed by <strong>Akshay Gurav</strong></p>
+        </div>
+    </div>
+
+    <script>
+        let eventSource = null;
+        let jobId = null;
+        
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = themeToggle.querySelector('.theme-icon');
+        const themeText = themeToggle.querySelector('.theme-text');
+        const htmlElement = document.documentElement;
+
+        // Check for saved theme preference or default to dark mode
+        const currentTheme = localStorage.getItem('theme') || 'dark';
+        htmlElement.setAttribute('data-theme', currentTheme);
+        updateThemeButton(currentTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = htmlElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            htmlElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeButton(newTheme);
+        });
+
+        function updateThemeButton(theme) {
+            if (theme === 'dark') {
+                themeIcon.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
+                themeText.textContent = 'Dark Mode';
+            } else {
+                themeIcon.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>';
+                themeText.textContent = 'Light Mode';
+            }
+        }
+
+        document.getElementById('scraper-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            
+            data.filter_publishers = (data.publisher_filter === 'specific');
+            delete data.publisher_filter;
+            
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Processing...<span class="spinner"></span>';
+            
+            try {
+                const response = await fetch('/scrape', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                jobId = result.job_id;
+                
+                document.getElementById('status').className = 'status running';
+                document.getElementById('status-text').textContent = 'Running...';
+                document.getElementById('log').textContent = '> Initializing PDF scraping engine...\n> Connecting to academic databases...\n';
+                document.getElementById('progress-bar').style.width = '10%';
+                
+                startStreaming(jobId);
+                
+            } catch (error) {
+                document.getElementById('status').className = 'status error';
+                document.getElementById('status-text').textContent = 'Error';
+                document.getElementById('log').textContent = '> [ERROR] Failed to initialize job\n> ' + error.message;
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Start Scraping';
+            }
+        });
+        
+        function startStreaming(jobId) {
+            if (eventSource) {
+                eventSource.close();
+            }
+            
+            eventSource = new EventSource(`/stream/${jobId}`);
+            const logElement = document.getElementById('log');
+            
+            eventSource.onmessage = function(event) {
+                if (event.data === '[JOB COMPLETED]') {
+                    pollStatus(jobId);
+                    eventSource.close();
+                    return;
+                }
+                
+                logElement.textContent += event.data;
+                logElement.scrollTop = logElement.scrollHeight;
+                
+                const currentWidth = parseInt(document.getElementById('progress-bar').style.width || '10');
+                if (currentWidth < 90) {
+                    document.getElementById('progress-bar').style.width = (currentWidth + 1) + '%';
+                }
+            };
+            
+            eventSource.onerror = function(event) {
+                console.error('Stream error:', event);
+                setTimeout(() => pollStatus(jobId), 2000);
+                eventSource.close();
+            };
+        }
+        
+        async function pollStatus(jobId) {
+            try {
+                const response = await fetch(`/status/${jobId}`);
+                const status = await response.json();
+                
+                const logElement = document.getElementById('log');
+                const statusElement = document.getElementById('status-text');
+                const statusDiv = document.getElementById('status');
+                const downloadBtn = document.getElementById('download-btn');
+                const progressBar = document.getElementById('progress-bar');
+                
+                if (status.status === 'running') {
+                    statusDiv.className = 'status running';
+                    statusElement.textContent = 'Running...';
+                    setTimeout(() => pollStatus(jobId), 2000);
+                } else if (status.status === 'completed') {
+                    statusDiv.className = 'status completed';
+                    statusElement.textContent = 'Completed Successfully';
+                    progressBar.style.width = '100%';
+                    logElement.textContent += '\n> [SUCCESS] Job completed successfully\n> PDFs ready for download';
+                    
+                    // Show topic details if available
+                    if (status.topics) {
+                        logElement.textContent += '\n\n> Processed Topics:\n';
+                        for (const [topic, details] of Object.entries(status.topics)) {
+                            logElement.textContent += `>   ${topic}: ${details.pdf_count} PDFs found\n`;
+                        }
+                    }
+                    
+                    downloadBtn.style.display = 'inline-block';
+                    downloadBtn.onclick = () => {
+                        window.location.href = `/download/${jobId}`;
+                    };
+                    
+                    const submitBtn = document.getElementById('submit-btn');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Start Scraping';
+                } else if (status.status === 'error') {
+                    statusDiv.className = 'status error';
+                    statusElement.textContent = 'Error Occurred';
+                    logElement.textContent += '\n> [ERROR] ' + (status.error || 'Unknown error occurred');
+                    if (status.log) {
+                        logElement.textContent += '\n\n> Full Log:\n' + status.log;
+                    }
+                    progressBar.style.width = '100%';
+                    
+                    const submitBtn = document.getElementById('submit-btn');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Start Scraping';
+                }
+            } catch (error) {
+                console.error('Polling error:', error);
+                setTimeout(() => pollStatus(jobId), 5000);
+            }
+        }
+    </script>
+</body>
+</html>
